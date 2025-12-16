@@ -1,0 +1,11 @@
+{
+  "alert_id": "ALRT-2025-0001",
+  "timestamp": "2025-12-16T12:34:56Z",
+  "severity": "medium",
+  "src_ip": "8.8.8.8",
+  "dst_ip": "203.0.113.10",
+  "domain": "example.com",
+  "sha256": "d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
+  "summary": "Suspicious outbound connection detected",
+  "source": "demo-siem"
+}

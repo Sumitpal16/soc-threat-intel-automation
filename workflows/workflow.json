@@ -1,0 +1,101 @@
+{
+  "name": "SOC Alert Enrichment - Starter",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "alert-enrich",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Normalize input fields\nconst a = items[0].json;\nreturn [{ json: {\n  alert_id: a.alert_id || `ALRT-${Date.now()}`,\n  severity: (a.severity || 'low').toLowerCase(),\n  src_ip: a.src_ip,\n  domain: a.domain,\n  sha256: a.sha256,\n  raw: a\n}}];"
+      },
+      "name": "Normalize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Simple risk score placeholder\nconst j = items[0].json;\nlet score = 0;\nif (j.severity === 'high') score += 40;\nif (j.severity === 'medium') score += 20;\nif (j.src_ip) score += 10;\nif (j.domain) score += 10;\nif (j.sha256) score += 20;\nscore = Math.min(100, score);\nreturn [{ json: { ...j, score, decision: score >= 60 ? 'high' : score >= 30 ? 'medium' : 'low' } }];"
+      },
+      "name": "Score",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        790,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.score}}",
+              "operation": "largerEqual",
+              "value2": 60
+            }
+          ]
+        }
+      },
+      "name": "IF High Risk",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score": {
+      "main": [
+        [
+          {
+            "node": "IF High Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "starter"
+}
