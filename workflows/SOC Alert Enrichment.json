@@ -1,0 +1,402 @@
+{
+  "name": "SOC Alert Enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "85b620ce-3fdd-4f73-9810-55a70d44ff46",
+              "leftValue": "={{ $json.verdict }}",
+              "rightValue": "=SUSPICIOUS",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "IF High Risk",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -272
+      ],
+      "id": "10cd8649-f743-4724-9197-8b27a298a323"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulating a batch of JSON alerts coming from a SIEM (e.g., Splunk/Wazuh)\nconst simulatedAlerts = [\n  {\n    \"src_ip\": \"118.25.6.39\", // Malicious (Tencent Cloud, often used for scanning)\n    \"alert_id\": \"ALERT-1001\",\n    \"severity\": \"high\",\n    \"timestamp\": new Date().toISOString()\n  },\n  {\n    \"src_ip\": \"8.8.8.8\", // Safe (Google DNS)\n    \"alert_id\": \"ALERT-1002\",\n    \"severity\": \"low\",\n    \"timestamp\": new Date().toISOString()\n  },\n  {\n    \"src_ip\": \"45.155.205.233\", // Malicious (Known Brute Force IP)\n    \"alert_id\": \"ALERT-1003\",\n    \"severity\": \"medium\",\n    \"timestamp\": new Date().toISOString()\n  }\n];\n\n// n8n expects an array of objects wrapped in \"json\"\nreturn simulatedAlerts.map(alert => ({\n  json: {\n    target_ip: alert.src_ip,\n    internal_severity: alert.severity,\n    alert_id: alert.alert_id,\n    timestamp: alert.timestamp\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -272
+      ],
+      "id": "dec31bb8-bbcf-4e64-96da-fe9f56a352f3",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -272
+      ],
+      "id": "b02d3e6e-c54d-444c-a1bd-7cab6f542648",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -480
+      ],
+      "id": "425b3bdf-5678-48e1-84a6-70b140576ffa",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZQbXnWI7cGKWi61JZDH-p7Je3enCWAhfoGjt70FPb4k",
+          "mode": "list",
+          "cachedResultName": "SOC Automation Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZQbXnWI7cGKWi61JZDH-p7Je3enCWAhfoGjt70FPb4k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZQbXnWI7cGKWi61JZDH-p7Je3enCWAhfoGjt70FPb4k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ISP": "={{ $json.isp }}",
+            "Score": "={{ $json.score }}",
+            "Verdict": "={{ $json.verdict }}",
+            "Country": "={{ $json.country }}",
+            "IP Address": "={{ $json.ip }}",
+            "Timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "IP Address",
+              "displayName": "IP Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Verdict",
+              "displayName": "Verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ISP",
+              "displayName": "ISP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        -112
+      ],
+      "id": "ecb2ebc7-3a3a-4443-94b1-567f15739d3e",
+      "name": "Logging",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QHzNoIpRNHvf3duN",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ipAddress",
+              "value": "={{ $json.target_ip }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        240,
+        -272
+      ],
+      "id": "696446f4-7d78-447c-b36f-f42524262daf",
+      "name": "Enrich via AbuseIPDB",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "25uzmGcBAeC55J0l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6289892854",
+        "text": "=🔥 SYSTEM FAILURE 🔥\n\nThe SOC Automation Workflow has crashed.\nExecution ID: {{ $execution.id }}\nError Message: {{ $json.execution.error.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        -480
+      ],
+      "id": "e14cecd2-bf89-44f5-94a1-1be1db28b52f",
+      "name": "Alert System Admin (Error)",
+      "webhookId": "1fc1728e-c5d7-457a-b5a5-42ebf14a3ab6",
+      "credentials": {
+        "telegramApi": {
+          "id": "p4KHUNwIAscConL4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6289892854",
+        "text": "={{ $('Risk Scoring Engine').item.json.emoji }} SOC Alert: Malicious IP Detected!\n\nIP: {{ $json['IP Address'] }}\nScore: {{ $json.Score }}\nISP: {{ $json.ISP }}\nCountry: {{ $json.Country }}\nAction: {{ $json.Verdict }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        -304
+      ],
+      "id": "0e985487-3e1a-4589-b894-d94a707d462a",
+      "name": "Alert Analyst (Telegram)",
+      "webhookId": "1fc1728e-c5d7-457a-b5a5-42ebf14a3ab6",
+      "credentials": {
+        "telegramApi": {
+          "id": "p4KHUNwIAscConL4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Iterate over ALL items (inputs), not just the first one\nreturn items.map(item => {\n  \n  // 1. Access the API data for the current item\n  // Optional chaining (?.) prevents crashing if data is missing\n  const apiData = item.json.data || {}; \n  \n  // 2. Calculate Risk\n  const abuseScore = apiData.abuseConfidenceScore || 0;\n  \n  // 3. Determine Verdict (and add an Emoji for the alert!)\n  let verdict = \"SAFE\";\n  let emoji = \"✅\"; // Green check\n  \n  if (abuseScore >= 50) {\n    verdict = \"HIGH_RISK\";\n    emoji = \"🚨\"; // Red siren\n  } else if (abuseScore > 0) {\n    verdict = \"SUSPICIOUS\";\n    emoji = \"⚠️\"; // Warning sign\n  }\n\n  // 4. Output clean data for each item\n  return {\n    json: {\n      // Pass through the original IP so we know which one this is\n      ip: apiData.ipAddress, \n      \n      // The Enrichment Data\n      score: abuseScore,\n      isp: apiData.isp,\n      country: apiData.countryCode,\n      domain: apiData.domain,\n      \n      // The Analysis\n      verdict: verdict,\n      emoji: emoji\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -272
+      ],
+      "id": "d424012f-2177-42da-ba99-51637030a5d2",
+      "name": "Risk Scoring Engine"
+    },
+    {
+      "parameters": {
+        "content": "(Error Trigger):\n🔴 Failsafe: Catches any API failures and alerts the admin immediately.",
+        "height": 208,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -544
+      ],
+      "id": "d021d9b6-7d58-4477-b7b2-2fcceb28be05",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "(The Logic):\n🧠 Enrichment & Scoring: Fetches threat intel and calculates a custom risk score."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -304
+      ],
+      "id": "6701828e-b740-4685-b216-cee1f0c2d8e6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n(The Fork): \n Parallel Execution: Logs all traffic for audit compliance while simultaneously filtering alerts.",
+        "height": 224,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -112
+      ],
+      "id": "cf7ceef0-bf75-445b-abd3-624e73a05d65",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Enrich via AbuseIPDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF High Risk": {
+      "main": [
+        [
+          {
+            "node": "Alert Analyst (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Alert System Admin (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logging": {
+      "main": [
+        []
+      ]
+    },
+    "Enrich via AbuseIPDB": {
+      "main": [
+        [
+          {
+            "node": "Risk Scoring Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Scoring Engine": {
+      "main": [
+        [
+          {
+            "node": "Logging",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF High Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1934c696-2f4a-4417-afa2-58bfad5dba71",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "abfb948072ef3bb3e1a8679b076789d71ae77d7621925d60bca98b7d3c28ae22"
+  },
+  "id": "g0laWZ1mLw48pHLX",
+  "tags": []
+}
