@@ -40,12 +40,13 @@ This workflow moves beyond simple linear execution by utilizing **parallel branc
 ## 📸 Screenshots
 
 ### 1. The Workflow (Parallel Execution)
-*Notice the "Fork" after the Score node—logging and alerting happen simultaneously.*
+<img width="1625" height="701" alt="image" src="https://github.com/user-attachments/assets/762c0868-ef81-405f-b58a-d55622192562" />
+
 ![Workflow Canvas](images/image_46d4d8.png)
 
 ### 2. The Dashboard (Threat Map)
-*Real-time visualization of blocked attacks by country.*
-*(Add your Looker Studio screenshot here)*
+<img width="1547" height="667" alt="image" src="https://github.com/user-attachments/assets/547a980b-fe17-4c20-8fd1-03e2f00345e3" />
+
 
 ## 🚀 Quick Start (Import Workflow)
 
